@@ -173,3 +173,175 @@ rm delete_me.card
 
 ## 8. Crear una nueva tarjeta de red de negocios
 
+1. Después de instalar el runtime y comenzar la red, debemos crear una tarjeta que implementaremos en el Plan de Inicio. Usa el siguiente comando para crear  `adminCard.card`:
+```bash
+composer card create -n global-citizens-network -p connection-profile.json -u admin -c ./credentials/admin-pub.pem -k ./credentials/admin-priv.pem
+```
+
+2. Importar la tarjeta de red de negocios:
+```bash
+composer card import -f admin@global-citizens-network.card
+```
+
+3. Prueba la tarjeta de red de negocios:
+```bash
+composer network ping -c admin@global-citizens-network
+```
+
+## 9. Interactuar con la red de negocios
+
+Puede utilizar composer-playground o composer-rest-server para interactuar con la red de negocios.
+
+
+Utilice los enlaces para obtener más información sobre [composer-playground](https://hyperledger.github.io/composer/latest/introduction/introduction) y [composer-rest-server](https://hyperledger.github.io/composer/latest/integrating/getting-started-rest-api).
+
+### a. Interactuar utilizando Composer-Playground
+
+1. Instale Composer-Playground:
+```bash
+npm install -g composer-playground@0.20
+```
+2. Ahora, vamos a iniciar el servidor. Asegúrese de estar en el mismo directorio que su `connection-profile.json`
+```bash
+composer-playground
+```
+3. En su navegador, vaya a [http://localhost:8080/test](http://localhost:8080/test) para realizar operaciones en la red de negocios.
+`Admin card` La red de negocios para global-citizen se crea en Composer Playground.
+
+![](images/home.png)
+
+Haga clic en el boton`Connect now`presente en la tarjeta `admin@global-citizens-network` para conectarse a la red de negocios de global-citizen.
+
+![](images/5.png)
+
+Para probar su definición de red de negocios, primero haga clic en la pestaña : **Test**
+
+En el registo de participantes `AidOrg`, cree un nuevo participante. Asegurese primero de hacer clic en el tab `AidOrg` y luego en el botón `Create New Participant`
+
+![](images/6.png)
+
+Rellene los datos para el participante y haga clic en `Create New`
+
+![](images/7.png)
+
+
+Nuevo participante `AidOrg` creado en el registro. Del mismo moro crea los otros participantes para la red.
+
+![](images/8.png)
+
+Los perfiles de conexión contienen la información necesaria para conectarse a una estructura. Las tarjetas de red de negocios combinan un perfil de conexión, identidad y certificados para permitir la conexión a una red de negocios en Hyperledger Composer Playground.
+
+Ahora estamos listos para agregar **Tarjetas de Red** para los participantes en la red. Haga esto primero haciendo clic en la pestaña `admin` y seleccione `ID Registry` para emitir **Nuevas Identificaciones** para los participantes y agregarlas a la billetera. Por favor, siga las instrucciones que se muestran en las imágenes a continuación: 
+
+![](images/9.png)
+
+![](images/10.png)
+
+![](images/11.png)
+
+![](images/12.png)
+
+Haga clic en  `Use Now` para seleccionar el registro de participantes `AidOrg` para realizar transacciones en la red. 
+
+![](images/13.png)
+
+Ejecute la transacción `CreateProjectPledge`.
+```
+{
+  "$class": "org.global.citizens.net.CreateProjectPledge",
+  "pledgeId": "p1",
+  "name": "child care",
+  "decription": "child care fund",
+  "fundsRequired": 100000,
+  "aidOrg": "resource:org.global.citizens.net.AidOrg#aid"
+}
+```
+![](images/14.png)
+
+El nuevo compromiso del proyecto se crea en el Registro de Activos. 
+
+![](images/15.png)
+Envíe la transacción `SendPledgeToGlobalCitizen`  para enviar el compromiso a global citizen para obtener los fondos para el proyecto.
+```
+{
+  "$class": "org.global.citizens.net.SendPledgeToGlobalCitizen",
+  "citizenId": "resource:org.global.citizens.net.GlobalCitizen#gc",
+  "pledgeId": "resource:org.global.citizens.net.ProjectPledge#p1"
+}
+```
+![](images/16.png)
+
+El registro de participantes de Global Citizen se actualiza con la nueva solicitud de compromiso.
+
+![](images/17.png)
+
+Global Citizen revisa el compromiso. Después de la verificación exitosa, envía una transacción `SendPledgeToGovOrg` para obtener fondos para el compromiso del proyecto de las organizaciones gubernamentales.
+
+```
+{
+  "$class": "org.global.citizens.net.SendPledgeToGovOrg",
+  "govOrg": ["resource:org.global.citizens.net.GovOrg#gov"],
+  "pledgeId": "resource:org.global.citizens.net.ProjectPledge#p1"
+}
+```
+![](images/18.png)
+
+Las organizaciones gubernamentales revisan el compromiso. Después de revisar si deciden financiar el proyecto, envían una transacción `UpdatePledge` para actualizar el activo de compromiso del proyecto.
+
+```
+{
+  "$class": "org.global.citizens.net.UpdatePledge",
+  "govOrgId": "resource:org.global.citizens.net.GovOrg#gov",
+  "pledgeId": "resource:org.global.citizens.net.ProjectPledge#p1",
+  "fundingType": "WEEKLY",
+  "approvedFunding": 100000,
+  "fundsPerInstallment": 1000
+}
+```
+![](images/19.png)
+
+![](images/20.png)
+
+![](images/21.png)
+
+Las organizaciones gubernamentales envían periódicamente los fondos al proyecto mediante el envío de la transacción  `TransferFunds`.
+```
+{
+  "$class": "org.global.citizens.net.TransferFunds",
+  "govOrgId": "resource:org.global.citizens.net.GovOrg#gov",
+  "pledgeId": "resource:org.global.citizens.net.ProjectPledge#p1"
+}
+```
+![](images/22.png)
+
+![](images/23.png)
+
+### b. Interactuar utilizando composer-rest-server
+
+1. Instala el composer-rest-server:
+```bash
+npm install -g composer-rest-server@0.20
+```
+
+2. Ahora, vamos a iniciar el servidor. Asegúrese de estar en el mismo directorio que su `connection-profile.json`
+```bash
+composer-rest-server -c admin@global-citizens-network -n never -w true
+```
+
+3. En su navegador, vaya a [http://localhost:3000/explorer](http://localhost:3000/explorer)
+
+4. Ahora puede utilizar la api swagger para realizar operaciones en la red empresarial como se muestra en [Interact using Composer-Playground](#a-interactuar-utilizando-composer-playground)
+
+## Retos 
+
+1. Añadir permisos de red
+2. Implementar cuadros de mando
+3. Implementar lógica para el seguimiento de pagos por defecto.
+4. Implementar la lógica de notificación
+5. Mejorar la lógica del fondo de transferencia.
+
+## Recursos Adicionales
+
+* [Hyperledger Fabric Docs](http://hyperledger-fabric.readthedocs.io/en/latest/)
+* [Hyperledger Composer Docs](https://hyperledger.github.io/composer/latest/introduction/introduction.html)
+
