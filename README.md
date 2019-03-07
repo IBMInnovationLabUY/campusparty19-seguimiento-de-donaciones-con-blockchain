@@ -63,7 +63,7 @@ Una red de negocios está formada por activos, participantes, transacciones, reg
 
 Primero necesitamos clonar un repositorio que contenga los tres componentes necesarios para crear un archivo BNA: un archivo lógico(**.js**), un archivo modelo (**.cto**) y un archivo de control de acceso(**.acl**).
 ```bash
-git clone https://github.com/IBM/global-citizen.git
+git clone https://github.com/IBMInnovationLabUY/seguimiento-de-donaciones-con-blockchain.git
 ```
 
 Para verificar que la estructura de los archivos es válida, ahora puede generar un Business Network Archive (BNA) para su definición de red de negocios. El archivo BNA es la unidad desplegable, un archivo que se puede implementar en el tiempo de ejecución de Composer para su ejecución. Use el siguiente comando para generar el archivo de red:
