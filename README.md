@@ -1,4 +1,4 @@
-# Realice el seguimiento de las donaciones con Blockchain
+# Realice el seguimiento de donaciones con Blockchain
 Cree, configure e interactúe con IBM Blockchain Platform a través de Hyperledger Composer Playground y del servidor REST de Hyperledger Composer
 
 ## Summary
@@ -37,7 +37,7 @@ npm install -g composer-cli@0.20
 
 4. Transferir fondos de acuerdo a la propuesta de compromiso.
 
-## Steps
+## Pasos
 
 1. [Generar el archivo de red de negocios (BNA)](#1)
 
@@ -47,11 +47,11 @@ npm install -g composer-cli@0.20
 
 4. [Use el secreto para obtener certificados de la autoridad de certificación](#4)
 
-5. [Use el archivo admin-pub.pem para agregar certificados a los miembros](#5)
+5. [Use el archivo admin-pub.pem para agregar certificados a los pares](#5)
 
 6. [Crear tarjeta de red de negocios de administración](#6)
 
-7. [Instalar runtime e iniciar la red.](#7)
+7. [Instalar el runtime e iniciar la red.](#7)
 
 8. [Crear una nueva tarjeta de red de negocios.](#8)
 
@@ -68,7 +68,7 @@ git clone https://github.com/IBMInnovationLabUY/seguimiento-de-donaciones-con-bl
 
 Para verificar que la estructura de los archivos es válida, ahora puede generar un Business Network Archive (BNA) para su definición de red de negocios. El archivo BNA es la unidad desplegable, un archivo que se puede implementar en el tiempo de ejecución de Composer para su ejecución. Use el siguiente comando para generar el archivo de red:
 ```bash
-cd global-citizen
+cd seguimiento-de-donaciones-con-blockchain
 npm install
 ```
 
@@ -92,3 +92,84 @@ Output file: global-citizens-network@0.0.1.bna
 Command succeeded
 ```
 Ahora debería tener un archivo BNA, (global-citizens-network.bna), ubicado en el directorio `global-citizens/dist` 
+
+## 2. Crear Servicio Blockchain
+
+1. En su navegador vaya a su [cuenta de IBM Cloud](https://console.bluemix.net/dashboard/apps)
+
+2. Crear un servicio de blockchain: 
+![](images/setup.gif)
+
+## 3. Obtener el secreto
+
+1. Inicie su servicio blockchain, haga clic en el perfil de conexión y seleccione para ver el archivo JSON
+
+2. Vaya hacia abajo hasta que vea `registrar` luego bajo  `enrollId` habrá enrollSecret `enrollSecret`.Copie este secreto, lo necesitaremos para el próximo paso para crear una tarjeta de red de negocios para la autoridad de certificación (CA) 
+![](images/connection.gif)
+
+## 4. Use el secreto para obtener certificados de la autoridad de certificación
+
+1. Descarga el connection profile
+
+2. Renombra el archivo JSON descargado a `connection-profile.json`
+
+3. Mueve el archivo `connection-profile.json`  a el directorio `global-citizen`
+
+4. Utilice el `enrollSecret` del paso anterior en el siguiente comando para crear una tarjeta de red de negocios para el certificate authority (CA)
+```bash
+composer card create -f ca.card -p connection-profile.json -u admin -s <enrollSecret>
+```
+
+5. Importe la tarjeta en la billetera de su sistema local con este comando
+
+```bash
+composer card import -f ca.card -c ca
+```
+  
+6. Finalmente, solicitamos certificados de la CA usando la tarjeta que importamos que contiene nuestro `enrollSecret`. Los certificados se almacenan en el directorio de credenciales que se crea después de completar este comando.
+```bash
+composer identity request --card ca --path ./credentials
+```
+
+## 5. Use el archivo admin-pub.pem para agregar certificados a los pares
+
+1. De vuelta en el servicio blockchain, haga clic en la pestaña de miembros, luego agregue el certificado. Vaya a su directorio `global-citizen/credentials`, y copie y pegue el contenido del archivo `admin-pub.pem`  en el cuadro de certificado. Presentar el certificado y reiniciar los pares. 
+![](images/admin-pub.gif)
+>Nota: reiniciar los pares toma un minuto.
+
+2. A continuación, necesitamos sincronizar los certificados del canal. Desde nuestro servicio de blockchain, `my network`haga clic en `Channels` y luego el botón de tres puntos. Luego haga clic en `Sync Certificate`. 
+![](images/sync-certs.gif)
+
+## 6. Crear tarjeta de red de negocios de administración
+
+1. Ahora que hemos sincronizado los certificados con nuestros pares, podemos instalar el runtime de Hyperledger Composer e iniciar la red creando una tarjeta de administración. Cree la tarjeta de administración con los roles de administrador de canal y administración de igual con el siguiente comando:
+```bash
+composer card create -f adminCard.card -p connection-profile.json -u admin -c ./credentials/admin-pub.pem -k ./credentials/admin-priv.pem --role PeerAdmin --role ChannelAdmin
+```
+
+2. Importe la tarjeta creada a partir del comando anterior:
+```bash
+composer card import -f adminCard.card -c adminCard
+```
+
+## 7. Instalar el runtime e iniciar la red
+
+1. Ahora usaremos la tarjeta de administración para instalar la red con el siguiente comando:
+```bash
+composer network install --card adminCard --archiveFile global-citizens-network@0.0.1.bna
+```
+>Nota: Si recibe un error en este momento, espere un minuto e intente nuevamente.
+
+2. Inicie la red de negocios proporcionando la tarjeta de administración, la ruta al archivo .bna y las credenciales recibidas de la CA. Este comando emitirá una tarjeta que eliminaremos, llamada `delete_me.card`.
+```bash
+composer network start --networkName global-citizens-network --networkVersion 0.0.1 -c adminCard -A admin -C ./credentials/admin-pub.pem -f delete_me.card
+```
+>Nota: Si recibe un error en este momento, espere un minuto e intente nuevamente.
+
+3. A continuación, vamos a eliminar delete_me.card:
+```bash
+rm delete_me.card
+```
+
+## 8. Crear una nueva tarjeta de red de negocios
+
