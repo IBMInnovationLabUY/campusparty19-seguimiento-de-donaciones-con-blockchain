@@ -57,4 +57,38 @@ npm install -g composer-cli@0.20
 
 9. [Interactuar con la red de negocios](#9)
 
+## 1. Generar el archivo de red de negocios (BNA)
 
+Una red de negocios está formada por activos, participantes, transacciones, reglas de control de acceso y, opcionalmente, eventos y consultas. En esta estructura de red de negocios, hay un archivo modelo (**.cto**) que contendrá las definiciones de clase para todos los activos, participantes y transacciones en la red de negocios. La estructura de esta red de negocios, también contiene un documento de control de acceso(**permissions.acl**) con reglas de control de acceso básicas, un archivo de script(**logic.js**) que contiene funciones del proceso de transacciones y un archivo **package.json** que contiene metadatos de la red de negocios.
+
+Primero necesitamos clonar un repositorio que contenga los tres componentes necesarios para crear un archivo BNA: un archivo lógico(**.js**), un archivo modelo (**.cto**) y un archivo de control de acceso(**.acl**).
+```bash
+git clone https://github.com/IBM/global-citizen.git
+```
+
+Para verificar que la estructura de los archivos es válida, ahora puede generar un Business Network Archive (BNA) para su definición de red de negocios. El archivo BNA es la unidad desplegable, un archivo que se puede implementar en el tiempo de ejecución de Composer para su ejecución. Use el siguiente comando para generar el archivo de red:
+```bash
+cd global-citizen
+npm install
+```
+
+Deberías ver el siguiente resultado:
+
+```bash
+Creating Business Network Archive
+
+
+Looking for package.json of Business Network Definition
+	Input directory: /Users/ishan/Documents/proj/global-citizens/global-citizens-network/global-citizen
+
+Found:
+	Description: This pattern should be able to Construct a 3-member blockchain application using the IBM Blockchain Platform, consisting of the following entities: an organization representing a government entity, an organization representing an NGO focused on the provision of aid, and an organization representing Global Citizen.
+	Name: global-citizens-network
+	Identifier: global-citizens-network@0.0.1
+
+Written Business Network Definition Archive file to
+Output file: global-citizens-network@0.0.1.bna
+
+Command succeeded
+```
+Ahora debería tener un archivo BNA, (global-citizens-network.bna), ubicado en el directorio `global-citizens/dist` 
