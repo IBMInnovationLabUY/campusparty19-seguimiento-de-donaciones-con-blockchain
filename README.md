@@ -41,7 +41,7 @@ npm install -g composer-cli@0.20
 
 1. [Generar el archivo de red de negocios (BNA)](#1)
 
-2. [Crear Servicio Blockchain](#2)
+2. [Crear el servicio de Blockchain](#2)
 
 3. [Obtener el secreto](#3)
 
@@ -93,7 +93,7 @@ Command succeeded
 ```
 Ahora debería tener un archivo BNA, (global-citizens-network.bna), ubicado en el directorio `global-citizens/dist` 
 
-## 2. Crear Servicio Blockchain
+## 2. Crear el servicio de Blockchain
 
 1. En su navegador vaya a su [cuenta de IBM Cloud](https://console.bluemix.net/dashboard/apps)
 
